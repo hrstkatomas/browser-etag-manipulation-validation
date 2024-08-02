@@ -5,11 +5,6 @@
 
 import type { MiddlewareHandler } from "hono";
 
-type ETagOptions = {
-	retainedHeaders?: string[];
-	weak?: boolean;
-};
-
 /**
  * Default headers to pass through on 304 responses. From the spec:
  * > The response must not contain a body and must include the headers that
@@ -27,10 +22,8 @@ export const RETAINED_304_HEADERS = [
 
 function sha1(str: string): string {
 	const hasher = new Bun.CryptoHasher("sha1");
-
 	hasher.update(str);
 	return hasher.digest("hex");
-	// return Promise.resolve(str);
 }
 
 function etagMatches(etag: string, ifNoneMatch: string | null) {
@@ -39,12 +32,6 @@ function etagMatches(etag: string, ifNoneMatch: string | null) {
 
 /**
  * ETag Middleware for Hono.
- *
- * @see {@link https://hono.dev/docs/middleware/builtin/etag}
- *
- * @param {ETagOptions} [options] - The options for the ETag middleware.
- * @param {boolean} [options.weak=false] - Define using or not using a weak validation. If true is set, then `W/` is added to the prefix of the value.
- * @param {string[]} [options.retainedHeaders=RETAINED_304_HEADERS] - The headers that you want to retain in the 304 Response.
  * @returns {MiddlewareHandler} The middleware handler function.
  *
  * @example
@@ -57,24 +44,23 @@ function etagMatches(etag: string, ifNoneMatch: string | null) {
  * })
  * ```
  */
-export const etag = (options?: ETagOptions): MiddlewareHandler => {
-	const retainedHeaders = options?.retainedHeaders ?? RETAINED_304_HEADERS;
-	const weak = options?.weak ?? false;
-
+export const etag = (): MiddlewareHandler => {
 	return async function etag(c, next) {
 		const ifNoneMatch = c.req.header("If-None-Match") ?? null;
+
+		// HACK: let's just call this "monitoring"
+		console.log("Received etag", c.req.url, ifNoneMatch);
 
 		await next();
 
 		const res = c.res as Response;
 		let etagHeader = res.headers.get("ETag");
-
-		if (!etagHeader) {
-			const hash = sha1((await res.clone().text()) || "");
-			etagHeader = weak ? `W/"${hash}"` : `"${hash}"`;
-		}
+		if (!etagHeader) etagHeader = `"${sha1((await res.clone().text()) || "")}"`;
 
 		if (etagMatches(etagHeader, ifNoneMatch)) {
+			// HACK: let's just call this "monitoring"
+			console.log("Response content matches received etag - 304 not modified");
+
 			await c.res.blob(); // Force using body
 			c.res = new Response(null, {
 				status: 304,
@@ -84,11 +70,15 @@ export const etag = (options?: ETagOptions): MiddlewareHandler => {
 				},
 			});
 			c.res.headers.forEach((_, key) => {
-				if (retainedHeaders.indexOf(key.toLowerCase()) === -1) {
+				if (RETAINED_304_HEADERS.indexOf(key.toLowerCase()) === -1) {
 					c.res.headers.delete(key);
 				}
 			});
 		} else {
+			// HACK: let's just call this "monitoring"
+			console.log(
+				"Response content did NOT matche the etag - 200 with etag progided",
+			);
 			c.res.headers.set("ETag", etagHeader);
 		}
 	};
