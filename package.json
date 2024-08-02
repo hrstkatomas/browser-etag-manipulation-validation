@@ -1,18 +1,19 @@
 {
-  "name": "browser-etag-manipulation-validation",
-  "module": "index.ts",
-  "type": "module",
-  "scripts": {
-    "start": "bun run index.ts"
-  },
-  "dependencies": {
-    "hono": "^4.5.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.8.3",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+	"name": "browser-etag-manipulation-validation",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"start": "bun run index.ts",
+		"test": "bun test index.test.ts"
+	},
+	"dependencies": {
+		"hono": "^4.5.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
 }
