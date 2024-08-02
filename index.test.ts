@@ -3,20 +3,20 @@ import app from ".";
 
 describe("Server", () => {
 	it("Should return 200 Response", async () => {
-		const req = new Request("http://localhost/");
+		const req = new Request("http://localhost/resource");
 		const res = await app.fetch(req);
 		expect(res.status).toBe(200);
 	});
 
 	it("should return 304 for matching etag", async () => {
-		const req = new Request("http://localhost/");
+		const req = new Request("http://localhost/resource");
 		const res = await app.fetch(req);
 		expect(res.status).toBe(200);
 
 		const etag = res.headers.get("etag");
 		if (!etag) throw "No etag provideed by the server";
 
-		const req2 = new Request("http://localhost/", {
+		const req2 = new Request("http://localhost/resource", {
 			headers: {
 				"if-none-match": etag,
 			},

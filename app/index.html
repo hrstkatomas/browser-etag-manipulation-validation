@@ -1,0 +1,35 @@
+<html lang="en">
+<head>
+    <title>App</title>
+</head>
+<body>
+<h1>App</h1>
+<p>
+    <button id="request">Request button</button>
+    <br>
+
+    <input type="checkbox" id="override" name="override" value="Bike">
+    <label for="override"> Override the etag</label>
+    <br>
+
+    <label for="etag">Etag override value:</label>
+    <input type="text" id="etag" name="etag" value="037840ee77c4557173069edce21c41f1d1941dba">
+</p>
+</body>
+
+<script>
+    document.getElementById("request").addEventListener("click", () => {
+        const checkbox = document.getElementById("override");
+
+        const textInput = document.getElementById("etag");
+
+        fetch("/resource", {
+            headers: checkbox.checked ? {"If-None-Match": `"${textInput.value}"`} : {},
+        })
+            .then((response) => response.text())
+            .then(console.log);
+    });
+
+    console.log("App script");
+</script>
+</html>

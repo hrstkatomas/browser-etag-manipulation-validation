@@ -3,9 +3,13 @@ import { etag } from "./etag/etag.ts";
 
 const app = new Hono();
 
-app.use("/*", etag());
-app.get("/", (c) => {
-	return c.text("Hello Hono!");
+app.get("/", async (c) => {
+	return c.html(await Bun.file("./app/index.html").text());
+});
+
+app.use("/resource", etag());
+app.get("/resource", (c) => {
+	return c.text("Hello there!");
 });
 
 const port = 3000;
