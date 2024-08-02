@@ -26,7 +26,11 @@
         fetch("/resource", {
             headers: checkbox.checked ? {"If-None-Match": `"${textInput.value}"`} : {},
         })
-            .then((response) => response.text())
+            .then(async (response) => ({
+                status: response.status,
+                etag: response.headers.get("etag"),
+                body: await response.text(),
+            }))
             .then(console.log);
     });
 
