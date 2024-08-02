@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { etag } from "hono/etag";
+import { etag } from "./etag/etag.ts";
 
 const app = new Hono();
 
